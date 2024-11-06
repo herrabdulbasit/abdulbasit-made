@@ -1,0 +1,61 @@
+
+pipeline TreePipeline{
+    TreePlantExtractor
+        ->TreePlantTextFileInterpreter
+        ->TreePlantCSVInterpreter
+        ->TreePlantTableInterpreter
+        ->TreePlantDatabaseLoader;
+
+    block TreePlantExtractor oftype HttpExtractor {
+        url: "https://opendata.rhein-kreis-neuss.de/api/v2/catalog/datasets/stadt-neuss-herbstpflanzung-2023/exports/csv";
+    }
+
+    block TreePlantTextFileInterpreter oftype TextFileInterpreter { }
+
+    block TreePlantCSVInterpreter oftype CSVInterpreter {
+        delimiter: ";";
+    }
+
+    valuetype StadtteilFiltered oftype text {
+        constraints: [
+            StadtteilRegex,
+        ];
+    }
+
+    constraint StadtteilRegex oftype RegexConstraint {
+        regex: /^[Vv][Oo][Gg][Ee][Ll][Ss][Aa][Nn][Gg]\b/;
+    }
+
+    valuetype GeoCoordinate oftype text {
+        constraints: [
+            GeoCoordinateRegex,
+        ];
+    }
+
+    constraint GeoCoordinateRegex oftype RegexConstraint {
+        regex: /\d{1,3}\.\d+\s*,\s*\d{1,3}\.\d+/;
+    }
+
+    
+    block TreePlantTableInterpreter oftype TableInterpreter {
+        header: true;
+        columns: [
+            "lfd_nr" oftype integer,
+            "stadtteil" oftype StadtteilFiltered,
+            "standort" oftype text,
+            "baumart_botanisch" oftype text,
+            "id" oftype GeoCoordinate,
+            "baumfamilie" oftype text,
+
+        ];
+    }
+     
+
+    block TreePlantDatabaseLoader oftype SQLiteLoader {
+        table: "trees";
+        file: "trees.sqlite";
+    }
+}
+
+
+// 23444|Vogelsang Bols-Siedlung|Niederdonker Weg|Juglans regia|51.2312, 6.6833|Walnuss
