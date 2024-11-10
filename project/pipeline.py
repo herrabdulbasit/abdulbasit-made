@@ -2,10 +2,11 @@ import os
 import sqlite3
 import pandas as pd
 from sqlalchemy import create_engine
-import requests
 import opendatasets as od
 import json
 from fuzzywuzzy import process
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 class data_pipeline():
     UNEMPLOYMENT = 1
@@ -73,8 +74,8 @@ class data_pipeline():
     # LOAD
 
     def load_data(self, df, table_name):
-        current_directory = os.getcwd()
-        data_folder_path = os.path.join(os.path.abspath(os.path.join(current_directory, os.pardir)), 'data')
+        data_folder_path = os.path.join(BASE_DIR, os.pardir, 'data')
+        data_folder_path = os.path.abspath(data_folder_path)
         if not os.path.exists(data_folder_path):
             os.makedirs(data_folder_path)
         db_path = os.path.join(data_folder_path, 'crime_unemployment_analysis.sqlite')
