@@ -27,6 +27,7 @@ class data_pipeline():
         self.init_unemployment_df()
         self.init_crime_rate_df()
         self.transform_unemployment_df()
+        self.transform_crime_rate_df()
         self.load_data(self.crime_r_df, 'crimes')
         self.load_data(self.unemp_df, 'unemployments')
 
@@ -60,6 +61,7 @@ class data_pipeline():
         self.unemp_df['Unemployment_Level'] = pd.cut(self.unemp_df['Rate'], bins=3, labels=['Low', 'Medium', 'High'])
     
     def transform_crime_rate_df(self):
+        self.crime_r_df = self.crime_r_df[['Record ID', 'City', 'State', 'Year', 'Month', 'Crime Type']]
         self.crime_r_df = self.crime_r_df[(self.crime_r_df['Year'] >= 1990) & (self.crime_r_df['Year'] <= 2010)].reset_index()
         self.crime_r_df['Month'] = self.crime_r_df['Month'].apply(lambda x: process.extractOne(x, data_pipeline._valid_months)[0] if x not in data_pipeline._valid_months else x)
         self.crime_r_df['Month_Number'] = self.crime_r_df['Month'].apply(lambda x: data_pipeline._valid_months.index(x) + 1 if x in data_pipeline._valid_months else None)
