@@ -1,0 +1,95 @@
+pipeline EconomyPipeline {
+
+    WorldBankDataExtractor
+        -> DataXLSXInterpreter
+        -> WorkbookSelector
+        -> ColumnRenameService
+        -> WorldDevelopmentDataSelector
+        -> GDPTableInterpreter  
+        -> GDPDatabaseLoader;
+
+    WorldDevelopmentDataSelector
+        -> BISTableInterpreter
+        -> BISDatabaseLoader;
+
+    block WorldBankDataExtractor oftype HttpExtractor {
+        url: "https://thedocs.worldbank.org/en/doc/7d852628d96b9411d43e5d36d5dff941-0050062022/original/Graphs-Chapter-5-02082022.xlsx";
+    }
+
+    block DataXLSXInterpreter oftype XLSXInterpreter { }
+    
+    block WorkbookSelector oftype SheetPicker {
+        sheetName: "Figure S5.1.2";
+    }
+
+    block WorldDevelopmentDataSelector oftype CellRangeSelector {
+        select: range P2:S45;
+    }
+
+    block ColumnRenameService oftype CellWriter {
+        at: range P2:S2;  
+        write: [
+            "Country Code",
+            "Economy",
+            "GDP per Capita",
+            "Bond Issuance Share"
+        ];
+    }
+
+    block BISTableInterpreter oftype TableInterpreter {
+        header: true;
+        columns: [
+            "Country Code" oftype  CountryCode ,
+            "Bond Issuance Share" oftype BondInsuranceShare
+        ];
+    }
+
+    block BISDatabaseLoader oftype SQLiteLoader {
+        table: "bondIssuance";
+        file: "country-stats.sqlite";
+    }
+
+    block GDPTableInterpreter oftype TableInterpreter {
+        header: true;
+        columns: [
+            "Country Code" oftype  CountryCode,
+            "GDP per Capita" oftype GDP
+        ];
+    }
+
+    block GDPDatabaseLoader oftype SQLiteLoader {
+        table: "gdpPerCapita";
+        file: "country-stats.sqlite";
+    }
+
+    constraint GDPRange on decimal:
+        value > 0;
+
+    constraint BISRange on decimal:
+        value >= 0 and value <= 1;
+
+    constraint CountryCodeRegex oftype RegexConstraint {
+        regex: /^[A-Za-z][A-Za-z][A-Za-z]\b/;
+    }
+
+
+    valuetype GDP oftype decimal {
+        constraints: [
+            GDPRange
+        ];
+    }
+
+    valuetype BondInsuranceShare oftype decimal {
+        constraints: [
+            BISRange
+        ];
+    }
+
+    valuetype CountryCode oftype text {
+        constraints: [
+            CountryCodeRegex
+        ];
+    }
+
+}
+
