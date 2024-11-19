@@ -39,7 +39,7 @@ pipeline EconomyPipeline {
     block BISTableInterpreter oftype TableInterpreter {
         header: true;
         columns: [
-            "Country Code" oftype  CountryCode ,
+            "Country Code" oftype CountryCodeAlpha3,
             "Bond Issuance Share" oftype BondInsuranceShare
         ];
     }
@@ -52,7 +52,7 @@ pipeline EconomyPipeline {
     block GDPTableInterpreter oftype TableInterpreter {
         header: true;
         columns: [
-            "Country Code" oftype  CountryCode,
+            "Country Code" oftype CountryCodeAlpha3,
             "GDP per Capita" oftype GDP
         ];
     }
@@ -68,10 +68,6 @@ pipeline EconomyPipeline {
     constraint BISRange on decimal:
         value >= 0 and value <= 1;
 
-    constraint CountryCodeRegex oftype RegexConstraint {
-        regex: /^[A-Za-z][A-Za-z][A-Za-z]\b/;
-    }
-
 
     valuetype GDP oftype decimal {
         constraints: [
@@ -82,12 +78,6 @@ pipeline EconomyPipeline {
     valuetype BondInsuranceShare oftype decimal {
         constraints: [
             BISRange
-        ];
-    }
-
-    valuetype CountryCode oftype text {
-        constraints: [
-            CountryCodeRegex
         ];
     }
 
