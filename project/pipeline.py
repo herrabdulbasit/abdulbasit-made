@@ -29,8 +29,10 @@ class data_pipeline():
         self.init_crime_rate_df()
         self.transform_unemployment_df()
         self.transform_crime_rate_df()
+        self.merge_datasets()
         self.load_data(self.crime_r_df, 'crimes')
         self.load_data(self.unemp_df, 'unemployments')
+        self.load_data(self.merged_datasets, 'unemployment_crime_merged')
 
     # EXTRACT
 
@@ -59,7 +61,9 @@ class data_pipeline():
         self.unemp_df['Month'] = self.unemp_df['Month'].str.title()
         self.unemp_df['Year'] = pd.to_numeric(self.unemp_df['Year'], errors='coerce')
         self.unemp_df['Rate'] = pd.to_numeric(self.unemp_df['Rate'], errors='coerce')
-        self.unemp_df['Unemployment_Level'] = pd.cut(self.unemp_df['Rate'], bins=3, labels=['Low', 'Medium', 'High'])
+        self.state_level_unemp_df = self.unemp_df.groupby(['Year', 'Month', 'State'], as_index=False).agg({'Rate': 'mean'})
+        self.state_level_unemp_df.rename(columns={'Rate': 'Average_Unemployment_Rate'}, inplace=True)
+        self.state_level_unemp_df['Unemployment_Level'] = pd.cut(self.state_level_unemp_df['Average_Unemployment_Rate'], bins=3, labels=['Low', 'Medium', 'High'])
     
     def transform_crime_rate_df(self):
         self.crime_r_df = self.crime_r_df[['Record ID', 'City', 'State', 'Year', 'Month', 'Crime Type']]
@@ -68,8 +72,13 @@ class data_pipeline():
         self.crime_r_df['Month_Number'] = self.crime_r_df['Month'].apply(lambda x: data_pipeline._valid_months.index(x) + 1 if x in data_pipeline._valid_months else None)
         self.crime_r_df['Year'] = pd.to_numeric(self.crime_r_df['Year'], errors='coerce')
         self.crime_r_df['Crime Type'].fillna("Unknown", inplace=True)
-        crime_counts = self.crime_r_df.groupby(['Year', 'State']).size().rename("Crime Count")
-        self.crime_r_df = self.crime_r_df.merge(crime_counts, on=['Year', 'State'])
+        self.crime_agg_df = self.crime_r_df.groupby(['Year', 'Month', 'State'], as_index=False).agg({
+            'Record ID': 'count'
+        })
+        self.crime_agg_df.rename(columns={'Record ID': 'Crime_Count'}, inplace=True)
+
+    def merge_datasets(self):
+        self.merged_datasets = pd.merge(self.state_level_unemp_df, self.crime_agg_df, on=['Year', 'Month', 'State'], how='inner')
 
     # LOAD
 
