@@ -2,23 +2,23 @@
 
 ## Title
 <!-- Give your project a short title. -->
-Crime and Unemployment in the US
+Crime and Unemployment in the US from 1990 to 2010.
 
 ## Main Question
 
 <!-- Think about one main question you want to answer based on the data. -->
-What is the Relationship Between Crime Rate and Unemployment Rates Across the US
+What is the Relationship Between Crime Rate and Unemployment Rates Across the US?
 
 ## Description
 
 <!-- Describe your data science project in max. 200 words. Consider writing about why and how you attempt it. -->
-In this project, we will try to answer an important question. What is the relationship between Unemployment and Crime Rates in different states of the US? Does higher unemployment also mean higher crime rates? Stay tuned to find out in this project.
+In this project, we will try to answer an important question. What is the relationship between Unemployment and Crime Rates in different states of the US? Does higher unemployment also mean higher crime rates? Stay tuned to find out in this project. In this project, we are targetting the years 1990 to 2010 only.
 
 ## Datasources
 
 <!-- Describe each datasources you plan to use in a section. Use the prefic "DatasourceX" where X is the id of the datasource. -->
 
-### Datasource1: Population and GDP (South and North America)
+### Datasource1: US Unemployment Rate by County, 1990-2016
 * Metadata URL: https://www.kaggle.com/datasets/jayrav13/unemployment-by-county-us
 * Data URL: https://www.kaggle.com/datasets/jayrav13/unemployment-by-county-us
 * Data Type: CSV
