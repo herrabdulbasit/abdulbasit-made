@@ -55,6 +55,61 @@ class TestDataPipeline:
         pipeline.set_kaggle_api_token()
         assert os.path.isfile('kaggle.json'), "Kaggle API token file not created"
 
+    def test_unemployment_transformation(self, pipeline):
+        print("Running test_unemployment_transformation")
+        pipeline.set_kaggle_api_token()
+        pipeline.init_unemployment_df()
+        pipeline.transform_unemployment_df()
+        
+        years = pipeline.unemp_df['Year'].unique()
+        assert min(years) >= 1990, "Years before 1990 found in transformed unemployment data"
+        assert max(years) <= 2010, "Years after 2010 found in transformed unemployment data"
+        
+        assert all(month in pipeline._valid_months for month in pipeline.unemp_df['Month'].unique()), \
+            "Invalid months found in transformed data"
+        
+        assert pipeline.unemp_df['Rate'].dtype.kind in 'fc', "Rate column not converted to numeric"
+        assert pipeline.unemp_df['Year'].dtype.kind in 'i', "Year column not converted to integer"
+        
+        unemployment_levels = pipeline.state_level_unemp_df['Unemployment_Level'].unique()
+        assert all(level in ['Low', 'Medium', 'High'] for level in unemployment_levels), \
+            "Invalid unemployment level categories found"
+
+    def test_crime_transformation(self, pipeline):
+        print("Running test_crime_transformation")
+        pipeline.set_kaggle_api_token()
+        pipeline.init_crime_rate_df()
+        pipeline.transform_crime_rate_df()
+        
+        required_columns = ['Record ID', 'City', 'State', 'Year', 'Month', 'Crime Type']
+        assert all(col in pipeline.crime_r_df.columns for col in required_columns), \
+            "Missing required columns in crime data"
+        
+        years = pipeline.crime_r_df['Year'].unique()
+        assert min(years) >= 1990, "Years before 1990 found in transformed crime data"
+        assert max(years) <= 2010, "Years after 2010 found in transformed crime data"
+        
+        assert all(month in pipeline._valid_months for month in pipeline.crime_r_df['Month'].unique()), \
+            "Invalid months found in transformed crime data"
+        
+        assert not pipeline.crime_r_df['Crime Type'].isnull().any(), \
+            "Null values found in Crime Type column"
+
+    def test_datasets_merge(self, pipeline):
+        print("Running test_datasets_merge")
+        pipeline.init_unemployment_df()
+        pipeline.init_crime_rate_df()
+        pipeline.transform_unemployment_df()
+        pipeline.transform_crime_rate_df()
+        pipeline.merge_datasets()
+        
+        required_columns = ['Year', 'Month', 'State', 'Average_Unemployment_Rate', 'Crime_Count']
+        assert all(col in pipeline.merged_datasets.columns for col in required_columns), \
+            "Missing required columns in merged dataset"
+        
+        duplicates = pipeline.merged_datasets.duplicated(['Year', 'Month', 'State']).sum()
+        assert duplicates == 0, f"Found {duplicates} duplicate entries in merged dataset"
+
     @pytest.fixture(autouse=True)
     def cleanup(self):
         yield
