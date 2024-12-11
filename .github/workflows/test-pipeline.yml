@@ -23,6 +23,11 @@ jobs:
         mkdir -p ~/.kaggle
         echo "${{ secrets.KAGGLE_JSON }}" > ~/.kaggle/kaggle.json
         chmod 600 ~/.kaggle/kaggle.json
+
+    - name: Debug Kaggle configuration
+      run: |
+        ls -la ~/.kaggle
+        cat ~/.kaggle/kaggle.json
     
     - name: Install dependencies
       run: |
