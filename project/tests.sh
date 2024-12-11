@@ -16,4 +16,4 @@ fi
 $PIP_COMMAND install pytest pandas sqlalchemy requests opendatasets fuzzywuzzy python-Levenshtein
 
 # Run the tests
-pytest -v spec.py 
+pytest "$(dirname "$0")/spec.py"
