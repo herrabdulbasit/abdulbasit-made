@@ -21,7 +21,7 @@ jobs:
     - name: Set up Kaggle credentials
       run: |
         mkdir -p ~/.kaggle
-        echo "${{ secrets.KAGGLE_JSON }}" > ~/.kaggle/kaggle.json
+        echo "{\"username\":\"$${{ secrets.KAGGLE_USERNAME }}\",\"key\":\"${{ secrets.KAGGLE_SECRET_KEY }}\"}" > ~/.kaggle/kaggle.json
         chmod 600 ~/.kaggle/kaggle.json
 
     - name: Debug Kaggle configuration
