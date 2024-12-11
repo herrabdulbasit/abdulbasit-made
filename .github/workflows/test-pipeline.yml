@@ -27,7 +27,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install --upgrade pip
-        pip install pytest pandas sqlalchemy requests opendatasets fuzzywuzzy python-Levenshtein kaggle sqlite3
+        pip install pytest pandas sqlalchemy requests opendatasets fuzzywuzzy python-Levenshtein kaggle
     
     - name: Run tests
       run: |
