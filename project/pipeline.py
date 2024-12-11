@@ -2,9 +2,9 @@ import os
 import sqlite3
 import pandas as pd
 from sqlalchemy import create_engine
-import opendatasets as od
 import json
 from fuzzywuzzy import process
+from kaggle.api.kaggle_api_extended import KaggleApi
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -20,11 +20,8 @@ class data_pipeline():
     _valid_months = ["January", "February", "March", "April", "May", "June", 
                 "July", "August", "September", "October", "November", "December"]
 
-    def __init__(self):
-        self._api_token = {"username":"abdulbasit26","key":"33537bb663496e170eb9a3ee983c3365"}
-
     def initialize_pipeline(self):
-        self.set_kaggle_api_token()
+        self.setup_kaggle_api()
         self.init_unemployment_df()
         self.init_crime_rate_df()
         self.transform_unemployment_df()
@@ -106,7 +103,15 @@ class data_pipeline():
         if os.path.isfile(dataset_file_path):
             print("Dataset was already downloaded.")
         else:
-            od.download(ds_url)
+            parts = ds_url.split('/datasets/')[-1].split('/')
+            owner_slug, dataset_name = parts[0], parts[1]
+
+            self._kaggle_api.dataset_download_files(f"{owner_slug}/{dataset_name}", path=dataset_file_path.split('/')[0], unzip=True)
+
+    def setup_kaggle_api(self):
+        self._kaggle_api = KaggleApi()
+        self._kaggle_api.authenticate()
+
 
 def main():
     data_pipeline().initialize_pipeline()

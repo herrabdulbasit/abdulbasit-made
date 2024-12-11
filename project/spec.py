@@ -10,7 +10,7 @@ class TestDataPipeline:
 
     def test_download_datasets(self, pipeline):
         print("Running test_download_datasets")
-        pipeline.set_kaggle_api_token()
+        pipeline.setup_kaggle_api()
         unemployment_path = data_pipeline._data_sets[data_pipeline.UNEMPLOYMENT]['file_path']
         unemployment_url = data_pipeline._data_sets[data_pipeline.UNEMPLOYMENT]['url']
         
@@ -50,14 +50,8 @@ class TestDataPipeline:
         except sqlite3.Error as e:
             pytest.fail(f"Database connection failed: {str(e)}")
 
-    def test_kaggle_token_creation(self, pipeline):
-        print("Running test_kaggle_token_creation")
-        pipeline.set_kaggle_api_token()
-        assert os.path.isfile('kaggle.json'), "Kaggle API token file not created"
-
     def test_unemployment_transformation(self, pipeline):
         print("Running test_unemployment_transformation")
-        pipeline.set_kaggle_api_token()
         pipeline.init_unemployment_df()
         pipeline.transform_unemployment_df()
         
@@ -77,7 +71,6 @@ class TestDataPipeline:
 
     def test_crime_transformation(self, pipeline):
         print("Running test_crime_transformation")
-        pipeline.set_kaggle_api_token()
         pipeline.init_crime_rate_df()
         pipeline.transform_crime_rate_df()
         
